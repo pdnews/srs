@@ -943,6 +943,8 @@ public:
     virtual std::string get_dvr_path(std::string vhost);
     // Get the plan of dvr, how to reap the flv file.
     virtual std::string get_dvr_plan(std::string vhost);
+    // DVR 切片完成以后，执行的命令
+    virtual std::string get_dvr_shell(std::string vhost);
     // Get the duration of dvr flv.
     virtual srs_utime_t get_dvr_duration(std::string vhost);
     // Whether wait keyframe to reap segment.

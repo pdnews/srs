@@ -2695,7 +2695,7 @@ srs_error_t SrsConfig::check_normal_config()
             if (n == "dvr") {
                 for (int j = 0; j < (int)conf->directives.size(); j++) {
                     string m = conf->at(j)->name;
-                    if (m != "enabled"  && m != "dvr_apply" && m != "dvr_path" && m != "dvr_plan"
+                    if (m != "enabled"  && m != "dvr_apply" && m != "dvr_path" && m != "dvr_plan" && m != "dvr_shell"
                         && m != "dvr_duration" && m != "dvr_wait_keyframe" && m != "time_jitter") {
                         return srs_error_new(ERROR_SYSTEM_CONFIG_INVALID, "illegal vhost.dvr.%s of %s", m.c_str(), vhost->arg0().c_str());
                     }
@@ -6351,7 +6351,6 @@ SrsConfDirective* SrsConfig::get_dvr_apply(string vhost)
     }
     
     return conf;
-    
 }
 
 string SrsConfig::get_dvr_path(string vhost)
@@ -6385,6 +6384,23 @@ string SrsConfig::get_dvr_plan(string vhost)
         return DEFAULT;
     }
     
+    return conf->arg0();
+}
+
+string SrsConfig::get_dvr_shell(string vhost)
+{
+    static string DEFAULT = "";
+
+    SrsConfDirective* conf = get_dvr(vhost);
+    if (!conf) {
+        return DEFAULT;
+    }
+
+    conf = conf->get("dvr_shell");
+    if (!conf || conf->arg0().empty()) {
+        return DEFAULT;
+    }
+
     return conf->arg0();
 }
 

@@ -25,6 +25,9 @@ using namespace std;
 #include <srs_app_utility.hpp>
 #include <srs_kernel_mp4.hpp>
 #include <srs_app_fragment.hpp>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
 
 SrsDvrSegmenter::SrsDvrSegmenter()
 {
@@ -56,6 +59,8 @@ srs_error_t SrsDvrSegmenter::initialize(SrsDvrPlan* p, SrsRequest* r)
     
     jitter_algorithm = (SrsRtmpJitterAlgorithm)_srs_config->get_dvr_time_jitter(req->vhost);
     wait_keyframe = _srs_config->get_dvr_wait_keyframe(req->vhost);
+    dvrPlan = _srs_config->get_dvr_plan(req->vhost);
+    dvrShell = _srs_config->get_dvr_shell(req->vhost);
     
     return srs_success;
 }
@@ -173,7 +178,22 @@ srs_error_t SrsDvrSegmenter::close()
     if ((err = fragment->rename()) != srs_success) {
         return srs_error_wrap(err, "rename fragment");
     }
-    
+
+    srs_trace("SrsDvrSegmenter::close(), dvrPlan: %s, shell: %s, url: %s",
+        dvrPlan.c_str(), dvrShell.c_str(), req->get_stream_url().c_str());
+
+    // sgement plan should concat all sgement to one file
+    if (srs_config_dvr_is_plan_segment(dvrPlan.c_str()) && dvrShell != "") {
+        std::string cmd = dvrShell;
+        cmd += " --app='" + req->app + "'";
+        cmd += " --stream='" + req->stream + "'";
+        cmd += " --url='" + req->get_stream_url() + "'";
+        cmd += " --file='" + fragment->fullpath() + "'";
+
+        srs_trace("SrsDvrSegmenter::close(), system exec: %s", cmd.c_str());
+        std::system(cmd.c_str());
+    }
+
     // TODO: FIXME: the http callback is async, which will trigger thread switch,
     //          so the on_video maybe invoked during the http callback, and error.
     if ((err = plan->on_reap_segment()) != srs_success) {

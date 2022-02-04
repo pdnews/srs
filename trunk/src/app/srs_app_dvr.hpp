@@ -51,6 +51,8 @@ private:
 public:
     SrsDvrSegmenter();
     virtual ~SrsDvrSegmenter();
+    std::string dvrPlan;
+    std::string dvrShell;
 public:
     // Initialize the segment.
     virtual srs_error_t initialize(SrsDvrPlan* p, SrsRequest* r);
