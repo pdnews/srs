@@ -2787,7 +2787,7 @@ srs_error_t SrsConfig::check_normal_config()
                 for (int j = 0; j < (int)conf->directives.size(); j++) {
                     string m = conf->at(j)->name;
                     if (m != "enabled" && m != "on_connect" && m != "on_close" && m != "on_publish"
-                        && m != "on_unpublish" && m != "on_play" && m != "on_stop"
+                        && m != "on_unpublish" && m != "on_play" && m != "on_stop" && m != "cleanup_shell"
                         && m != "on_dvr" && m != "on_hls" && m != "on_hls_notify") {
                         return srs_error_new(ERROR_SYSTEM_CONFIG_INVALID, "illegal vhost.http_hooks.%s of %s", m.c_str(), vhost->arg0().c_str());
                     }
@@ -4732,6 +4732,16 @@ SrsConfDirective* SrsConfig::get_vhost_on_hls_notify(string vhost)
     }
     
     return conf->get("on_hls_notify");
+}
+
+std::string SrsConfig::get_vhost_cleanup_shell(string vhost)
+{
+    SrsConfDirective* conf = get_vhost_http_hooks(vhost);
+    if (!conf) {
+        return NULL;
+    }
+
+    return conf->get("cleanup_shell")->arg0().c_str();
 }
 
 bool SrsConfig::get_bw_check_enabled(string vhost)

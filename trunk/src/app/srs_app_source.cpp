@@ -35,6 +35,10 @@ using namespace std;
 #include <srs_protocol_format.hpp>
 #include <srs_app_rtc_source.hpp>
 
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+
 #define CONST_MAX_JITTER_MS         250
 #define CONST_MAX_JITTER_MS_NEG         -250
 #define DEFAULT_FRAME_TIME_MS         10
@@ -2557,6 +2561,17 @@ void SrsLiveSource::on_unpublish()
     stat->on_stream_close(req);
 
     handler->on_unpublish(this, req);
+
+    std::string cmd = _srs_config->get_vhost_cleanup_shell(req->host);
+    srs_trace("cleanup shell %s", cmd.c_str());
+    if (cmd != "") {
+        cmd += " --app='" + req->app + "'";
+        cmd += " --stream='" + req->stream + "'";
+        cmd += " --url='" + req->get_stream_url() + "'";
+
+        srs_trace("concat when unpublish: %s", cmd.c_str());
+        std::system(cmd.c_str());
+    }
 
     if (bridger_) {
         bridger_->on_unpublish();
