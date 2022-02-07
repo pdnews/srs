@@ -6,12 +6,12 @@ RUN yum install -y gcc make gcc-c++ patch unzip perl git
 ARG SRS_AUTO_PACKAGER
 
 # Build and install SRS.
-COPY . /srs
+COPY . /srs/trunk
 WORKDIR /srs/trunk
-RUN ./configure --srt=on --jobs=2 && make -j2 && make install
+RUN ./configure --ffmpeg-tool=on --srt=on --jobs=2 && make -j2 && make install
 
 # All config files for SRS.
-RUN cp -R conf /usr/local/srs/conf && \
+RUN cp -R conf /usr/local/srs/ && \
     cp research/api-server/static-dir/index.html /usr/local/srs/objs/nginx/html/ && \
     cp research/api-server/static-dir/favicon.ico /usr/local/srs/objs/nginx/html/ && \
     cp research/players/crossdomain.xml /usr/local/srs/objs/nginx/html/ && \
@@ -31,6 +31,7 @@ EXPOSE 1935 1985 8080 8000/udp 10080/udp
 COPY --from=build /usr/local/bin/ffmpeg /usr/local/srs/objs/ffmpeg/bin/ffmpeg
 # SRS binary, config files and srs-console.
 COPY --from=build /usr/local/srs /usr/local/srs
+COPY objs/srs-dvr-concat /usr/local/srs-dvr-concat/srs-dvr-concat
 
 # Default workdir and command.
 WORKDIR /usr/local/srs
